@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,9 +41,15 @@ public class RestaurantController {
     }
 
     @GetMapping(path = "")
-    public Page<RestaurantDto> listRestaurants(Pageable pageable, @RequestParam(defaultValue = "1") int page,
-                                               @RequestParam(defaultValue = "30") int size) {
+    public Page<RestaurantDto> listRestaurants(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        // PageRequest.of is 0-indexed, so subtract 1
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("restaurantId").ascending());
+
         Page<RestaurantEntity> restaurantEntityPage = restaurantService.findAll(pageable);
+
         return restaurantEntityPage.map(restaurantEntity -> {
             RestaurantDto restaurantDto = restaurantMapper.mapTo(restaurantEntity);
             restaurantDto.setImage(restaurantEntity.getImage());

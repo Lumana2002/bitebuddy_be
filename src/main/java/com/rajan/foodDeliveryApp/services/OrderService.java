@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface OrderService {
     @Autowired
-    WeatherService weatherService = null;
+//    WeatherService weatherService = null;
 
     OrderEntity save(OrderEntity orderEntity, UserEntity user, RestaurantEntity restaurant);
 

@@ -129,12 +129,20 @@ public class MenuController {
     }
 
     @GetMapping(path = "/menus/{id}")
-    public ResponseEntity<MenuDto> getMenu(@PathVariable("id") Long id) {
-        Optional<MenuEntity> optionalMenuEntity = menuService.findOne(id);
-        MenuEntity menuEntity = optionalMenuEntity.orElseThrow(() -> new IllegalArgumentException("Could not find Menu"));
-        MenuDto menuDto = menuMapper.mapTo(menuEntity);
-        return new ResponseEntity<>(menuDto, HttpStatus.OK);
+    public ResponseEntity<?> getMenu(@PathVariable("id") Long id) {
+        try {
+            Optional<MenuEntity> optionalMenuEntity = menuService.findOne(id);
+            if (optionalMenuEntity.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Menu not found with id: " + id);
+            }
+            MenuDto menuDto = menuMapper.mapTo(optionalMenuEntity.get());
+            return new ResponseEntity<>(menuDto, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace(); // for development - remove in production
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the menu.");
+        }
     }
+
 
 
     @GetMapping(path = "/restaurants/{restaurant_id}/menus")
