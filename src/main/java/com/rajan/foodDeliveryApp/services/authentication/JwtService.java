@@ -74,7 +74,7 @@ public class JwtService {
     }
 
     public String createToken(String email, String role) {
-        final long validityInMilliseconds = 1000 * 60 * 60 * 60; // 10 hours validity
+        final long validityInMilliseconds = 1000L * 60 * 60 * 24 * 30; // 30 days validity
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
