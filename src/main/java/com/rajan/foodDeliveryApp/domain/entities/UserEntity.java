@@ -37,6 +37,9 @@ public class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderEntity> orders;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); // kinda pointless I've used extractRole from token instead
@@ -46,6 +49,7 @@ public class UserEntity implements UserDetails {
     public String getUsername() {
         return getEmail();
     }
+
 
 
 }

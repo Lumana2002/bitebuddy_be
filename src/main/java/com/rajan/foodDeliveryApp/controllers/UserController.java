@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
@@ -43,7 +45,7 @@ public class UserController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public Page<UserDto> listUsers(Pageable pageable) {
         Page<UserEntity> usersList = userService.findAll(pageable);
@@ -60,9 +62,14 @@ public class UserController {
         return ResponseEntity.ok(userMapper.mapTo(updatedUser));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User trying to delete: " + auth.getName());
+        System.out.println("Authorities: " + auth.getAuthorities());
+
         if (!userService.isExists(id)) {
             return ResponseEntity.notFound().build();
         }
