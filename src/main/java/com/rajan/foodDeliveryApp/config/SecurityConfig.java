@@ -28,6 +28,7 @@ public class SecurityConfig {
             "/api/files/images/{filename}",
             "/api/restaurants/{restaurant_id}/menus",
             "/api/foods/menu/{id}",
+            "/api/recommendations",
             "/api/recommendations/restaurant",
             "/api/password-reset/*",
     };

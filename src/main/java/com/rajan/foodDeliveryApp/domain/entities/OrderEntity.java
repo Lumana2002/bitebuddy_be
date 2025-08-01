@@ -74,4 +74,6 @@ public class OrderEntity {
     @Column(name = "notes")
     private String notes;
 
+    @Column(name= "weather")
+    private String weather;
 }

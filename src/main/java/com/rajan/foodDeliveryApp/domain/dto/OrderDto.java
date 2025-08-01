@@ -32,5 +32,6 @@ public class OrderDto {
     private String cancellationReason;
     private LocalDateTime deliveryDate;
     private String notes;
+    private String weather;
 
 }

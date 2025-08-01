@@ -34,6 +34,8 @@ public class UserEntity implements UserDetails {
 
     private String contact;
 
+    private String address;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

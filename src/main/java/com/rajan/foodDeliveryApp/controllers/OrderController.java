@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,21 +74,20 @@ public class OrderController {
         orderEntity.setOrderDetails(null);
         OrderEntity savedOrderEntity = orderService.save(orderEntity, orderUser, orderRestaurant);
 
-        log.info(String.valueOf(savedOrderEntity.getOrderDetails()));
-        log.info(String.valueOf(savedOrderEntity));
-
         List<OrderDetailEntity> savedOrderDetails = new ArrayList<>();
         for (OrderDetailDto orderDetailDto : orderDto.getOrderDetails()) {
             OrderDetailEntity newOrderDetail = orderDetailMapper.mapFrom(orderDetailDto);
             newOrderDetail.setOrderId(savedOrderEntity.getId());
             newOrderDetail.setFoodId(orderDetailDto.getFoodId());
-            newOrderDetail.setFoodName(orderDetailDto.getFoodName());
+
+            FoodEntity food = foodService.findById(orderDetailDto.getFoodId())
+                    .orElseThrow(() -> new IllegalArgumentException("Food not found"));
+            newOrderDetail.setFoodName(food.getName());
             savedOrderDetails.add(newOrderDetail);
         }
 
-        log.info(savedOrderDetails.toString());
-
         List<OrderDetailEntity> savedOrderDetailsList = orderDetailService.saveAll(savedOrderDetails);
+        savedOrderEntity.setOrderDate(LocalDateTime.now());
         savedOrderEntity.setOrderDetails(savedOrderDetailsList);
 
         savedOrderEntity = orderService.save(savedOrderEntity);

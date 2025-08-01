@@ -49,6 +49,7 @@ public class AuthService {
                 .lastName(registerRequest.getLastName())
                 .role(registerRequest.getRole() != null? registerRequest.getRole() : Role.USER)
                 .contact(registerRequest.getContact())
+                .address(registerRequest.getAddress())
                 .build();
         userRepository.save(u);
         UserDto userDto = userMapper.mapTo(u);
