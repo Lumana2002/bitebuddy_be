@@ -2,7 +2,7 @@ package com.rajan.foodDeliveryApp.controllers;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,16 +21,12 @@ import java.nio.file.Paths;
 @RequestMapping("/api/files")
 public class FileController {
 
-    private final ResourceLoader resourceLoader;
-    @Value("${file.upload-dir:src/main/resources/static/storage}")
+    //@Value("${file.upload-dir:/home/rajan/Projects/lumana/images/}")
+    @Value("${file.upload-dir:H:/Projects/images/}")
     private String uploadDir;
 
     @Value("${file.base-url:http://localhost:8080}")
     private String baseUrl;
-
-    public FileController(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
 
     @PostMapping("/upload")
     public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file) {
@@ -39,27 +36,29 @@ public class FileController {
             }
 
             File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            if (!dir.exists() && !dir.mkdirs()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to create upload directory.");
             }
 
             String filename = file.getOriginalFilename();
-            if (filename == null) {
+            if (filename == null || filename.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Filename is not provided.");
             }
+
             filename = filename.replace("_", "");
             filename = getUniqueFileName(dir, filename);
-            Path filePath = Paths.get(uploadDir, filename);
 
+            Path filePath = Paths.get(uploadDir, filename);
             Files.copy(file.getInputStream(), filePath);
 
-            String image = String.format("%sapi/files/images/%s", baseUrl, filename);
-            System.out.println("BaseUrl" + baseUrl);
+            String imageUrl = String.format("%sapi/files/images/%s", baseUrl, filename);
+            return ResponseEntity.ok().body(new FileUploadResponse(imageUrl));
 
-            return ResponseEntity.ok().body(new FileUploadResponse(image));
         } catch (IOException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("File upload failed: " + e.getMessage());
         }
     }
 
@@ -90,18 +89,30 @@ public class FileController {
     @GetMapping("/images/{filename}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
-            Resource resource = resourceLoader.getResource("classpath:/static/storage/" + filename);
+            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
 
+            // Try to detect file type
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
-        } catch (Exception e) {
+
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -121,5 +132,3 @@ public class FileController {
         }
     }
 }
-
-

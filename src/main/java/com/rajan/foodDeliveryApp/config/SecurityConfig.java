@@ -31,6 +31,7 @@ public class SecurityConfig {
             "/api/recommendations",
             "/api/recommendations/restaurant",
             "/api/password-reset/*",
+            "/api/files/images/**",
     };
 
     private final JwtAuthFilter jwtAuthFilter;
