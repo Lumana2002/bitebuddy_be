@@ -20,6 +20,8 @@ public interface OrderService {
 
     Page<OrderEntity> findAll(Pageable pageable, Long userId);
 
+    Page<OrderEntity> findByRestaurantId(Pageable pageable, Long restaurantId);
+
     Optional<OrderEntity> findOne(Long id);
 
     boolean isExists(Long id);

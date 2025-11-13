@@ -43,6 +43,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<OrderEntity> findByRestaurantId(Pageable pageable, Long restaurantId) {
+        return orderRepository.findAllByRestaurant_RestaurantId(pageable, restaurantId);
+    }
+
+    @Override
     public Optional<OrderEntity> findOne(Long id) {
         return orderRepository.findById(id);
     }

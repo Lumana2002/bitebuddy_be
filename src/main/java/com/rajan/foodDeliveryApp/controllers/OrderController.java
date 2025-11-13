@@ -58,6 +58,11 @@ public class OrderController {
         return ordersListEntity.map(orderMapper::mapTo);
     }
 
+    @GetMapping("/restaurants/{restaurant_id}/orders")
+    public Page<OrderDto> listRestaurantOrders(@PathVariable("restaurant_id") Long restaurantId, Pageable pageable) {
+        Page<OrderEntity> ordersListEntity = orderService.findByRestaurantId(pageable, restaurantId);
+        return ordersListEntity.map(orderMapper::mapTo);
+    }
     // TODO other roles like admin can't create orders for better security
 //    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{user_id}/orders")
@@ -94,5 +99,23 @@ public class OrderController {
         OrderDto savedOrderDto = orderMapper.mapTo(savedOrderEntity);
 
         return new ResponseEntity<>(savedOrderDto, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/orders/{orderId}/status")
+    public ResponseEntity<OrderDto> updateOrderStatus(
+            @PathVariable("orderId") Long orderId,
+            @RequestBody OrderDto orderDto
+    ) {
+        OrderEntity order = orderService.findOne(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        order.setOrderStatus(orderDto.getOrderStatus());
+
+        OrderEntity updatedOrder = orderService.save(order);
+
+        OrderDto finalOrderDto = orderMapper.mapTo(updatedOrder);
+        System.out.println("Orderdto" + finalOrderDto);
+
+        return ResponseEntity.ok(orderDto);
     }
 }

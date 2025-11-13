@@ -53,7 +53,8 @@ public class FileController {
 
             Files.copy(file.getInputStream(), filePath);
 
-            String image = String.format("%s/api/files/images/%s", baseUrl, filename);
+            String image = String.format("%sapi/files/images/%s", baseUrl, filename);
+            System.out.println("BaseUrl" + baseUrl);
 
             return ResponseEntity.ok().body(new FileUploadResponse(image));
         } catch (IOException e) {

@@ -18,4 +18,6 @@ public class FoodDto {
     private Integer spiceLevel;
     private String category;
     private BigDecimal price;
+    private String image;
+
 }

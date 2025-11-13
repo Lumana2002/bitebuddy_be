@@ -31,4 +31,7 @@ public class FoodEntity {
 
     @Column(name = "menu_id")
     private Long menuId;
+
+    @Column(name = "image")
+    private String image;
 }

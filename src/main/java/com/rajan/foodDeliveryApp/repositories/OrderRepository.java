@@ -12,5 +12,8 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     Page<OrderEntity> findAllByUserId(Pageable pageable, Long userId);
+
     List<OrderEntity> findByWeather(String weather);
+
+    Page<OrderEntity> findAllByRestaurant_RestaurantId(Pageable pageable, Long restaurantId);
 }
